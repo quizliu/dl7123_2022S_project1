@@ -30,6 +30,7 @@ def arg_parser():
 	optimizer_option = ['sgd', 'adam', 'adamw']
 	scheduler_option = ['plateau', '']
 	measurement_option = ['min', 'max']
+	bool_option = ['true', 'True', 'False', 'false']
 	parser = argparse.ArgumentParser(description='project1')
 
 	# args for the network
@@ -58,20 +59,34 @@ def arg_parser():
 	parser.add_argument('--weight_decay', '-w', default=1e-2, metavar='', help='regularization: L2 penalty')
 
 	# args for training setting
-	parser.add_argument('--progress_bar', '-p', type=bool, default=False, metavar='', help='show progress bar when training')
-	parser.add_argument('--cuda', type=bool, default=True, metavar='', help='use GPU for the training')
-	parser.add_argument('--test', type=bool, default=False, metavar='', help='take a test run, skip waiting time for training, check bugs in code')
-	parser.add_argument('--plot', type=bool, default=True, metavar='', help='plot training curves')
+	parser.add_argument('--progress_bar', '-p', choices=bool_option, type=str, default=False, metavar='', help='show progress bar when training')
+	parser.add_argument('--cuda', choices=bool_option, type=str, default=True, metavar='', help='use GPU for the training')
+	parser.add_argument('--test', choices=bool_option, type=str, default=False, metavar='', help='take a test run, skip waiting time for training, check bugs in code')
+	parser.add_argument('--plot', choices=bool_option, type=str, default=True, metavar='', help='plot training curves')
+	parser.add_argument('--save', choices=bool_option, type=str, default=False, metavar='', help='save the trained model')
+
 	args = parser.parse_args()
-	args.cuda = args.cuda and torch.cuda.is_available()
 	if args.weight_decay != 'b':
 		args.weight_decay = float(args.weight_decay)
 
+	# bug: -p false sets the parameter True, only -p '' sets the parameter false
+	if type(args.progress_bar) == str:
+		args.progress_bar = True if args.progress_bar.lower == 'true' else False
+	if type(args.cuda) == str:
+		args.cuda = True if args.cuda.lower == 'true' else False
+	if type(args.test) == str:
+		args.test = True if args.test.lower == 'true' else False
+	if type(args.plot) == str:
+		args.plot = True if args.plot.lower == 'true' else False
+	if type(args.save) == str:
+		args.save = True if args.save.lower == 'true' else False
+
+	args.cuda = args.cuda and torch.cuda.is_available()
 	return args
 
 
-class BasicBlock(nn.Module):  # this is one residual block
-	def __init__(self, in_planes, planes, stride=1):  # one block has 2 conv layer, fixed
+class BasicBlock(nn.Module):
+	def __init__(self, in_planes, planes, stride=1):
 		super(BasicBlock, self).__init__()
 		self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
 		self.bn1 = nn.BatchNorm2d(planes)
@@ -129,11 +144,23 @@ class ResNet(nn.Module):
 
 
 class Cutout(object):
+	"""
+	no cutout in Pytorch, write a class with __call__ to imitate transforms in T
+	"""
 	def __init__(self, hole, length):
+		"""
+		:param hole: number of holes on the image
+		:param length: size of the holes
+		"""
 		self.hole = hole
 		self.length = length
 
 	def __call__(self, img):
+		"""
+		make it callable to use it at data processing stage along with other transforms in T
+		:param img: image before cutout
+		:return: image after cutout
+		"""
 		c, h, w = img.size()
 		mask = np.ones((c, h, w), np.float32)
 
@@ -149,6 +176,10 @@ class Cutout(object):
 
 class Project1:
 	def __init__(self, args):
+		"""
+		vars for training
+		:param args: command line arguments
+		"""
 		self.args = args
 		self.train_loader = self.test_loader = None
 		self.net = self.loss = self.optimizer = self.scheduler = None
@@ -159,6 +190,9 @@ class Project1:
 		self.trainable_parameters = 0
 
 	def process_data(self):
+		"""
+		stage for normalization and data augmentation
+		"""
 		download = False if os.path.isdir('CIFAR10') else True
 		train = tv.datasets.CIFAR10('./CIFAR10/', download=download, train=True)
 		mean = (train.data / 255).mean(axis=(0, 1, 2))
@@ -179,6 +213,9 @@ class Project1:
 		self.test_loader = torch.utils.data.DataLoader(test, batch_size=self.args.batch_size, shuffle=False)
 
 	def create_network(self):
+		"""
+		stage for creating network, loss, optimizer
+		"""
 		self.net = ResNet(self.args.channel, BasicBlock, self.args.resnet)
 		if self.args.cuda:
 			self.net = self.net.cuda()
@@ -211,6 +248,10 @@ class Project1:
 			)
 
 	def train_model(self):
+		"""
+		stage for training model and print performance every epoch
+		save the trained model at the end
+		"""
 		for e in range(1, self.args.epoch + 1):
 			train_loss = 0.0
 			test_loss = 0.0
@@ -265,18 +306,25 @@ class Project1:
 
 			print(f'epoch {e}, train loss {train_loss:.4}, test loss {test_loss:.4}, test acc {test_acc:.4}, lr {lr:.4}')
 
-		torch.save(self.net.state_dict(), f"{int(time.time())}.pt")
+		if self.args.save:
+			torch.save(self.net.state_dict(), f"{int(time.time())}.pt")
 
 	def plot_result(self):
+		"""
+		stage for ploting curves
+		"""
 		line_w = 1
 		dot_w = 4
 		fig, ax1 = plt.subplots()
 		ax2 = ax1.twinx()
 
+		# ax1 for train loss and test loss(left y-axis)
+		# ax2 for test acc(right y-axis)
 		ax1.plot(range(1, self.args.epoch + 1), self.train_loss, 'b--', linewidth=line_w, label='train trror')
 		ax1.plot(range(1, self.args.epoch + 1), self.test_loss, 'r--', linewidth=line_w, label='test trror')
 		ax2.plot(range(1, self.args.epoch + 1), self.test_acc, 'g--', linewidth=line_w, label='test tccuracy')
 
+		# plot vertical lines for lr changing
 		vline = False
 		for i, v in enumerate(self.lr):
 			if i >= 1 and v != self.lr[i - 1]:
@@ -294,6 +342,7 @@ class Project1:
 		ax1.scatter(range(1, self.args.epoch + 1), self.test_loss, color='r', s=dot_w)
 		ax2.scatter(range(1, self.args.epoch + 1), self.test_acc, color='g', s=dot_w)
 
+		# note the highest test acc
 		best_acc = max(self.test_acc)
 		best_acc_epoch = self.test_acc.index(max(self.test_acc))
 		ax2.scatter(best_acc_epoch + 1, best_acc, color='#7D3C98', marker='x', s=10, linewidths=3)
@@ -308,12 +357,17 @@ class Project1:
 		ax1.set_ylabel('loss')
 		ax2.set_ylabel('accuracy')
 
+		# set some value to make the figure looks better if epoch is too large
 		ax1.set_ylim([0, max(max(self.train_loss), max(self.test_loss)) + 1])
 		ax2.set_ylim([min(self.test_acc) - 0.001, 0.95])
 		plt.grid(True)
 		plt.show()
 
 	def check_parameters(self):
+		"""
+		check model's trainable parameters
+		:return False if parameters > 5M
+		"""
 		self.trainable_parameters = sum(p.numel() for p in self.net.parameters() if p.requires_grad)
 
 		print(f"trainable parameters: {self.trainable_parameters}")

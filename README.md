@@ -4,9 +4,10 @@ This is project1's repo for dl7123.
 
 project1.py is a command line tool for building and training a model. No other codes needed.
 
-plot_essay.py is used for plot figures in our report.
-
 project1.pt is the trained model.
+
+plot_essay.py and results are used for plot figures in our report.
+
 
 ## usage
 Dependency libs: `torch, torchvision, numpy, matplotlib.pyplot, tqdm`
@@ -21,4 +22,4 @@ To see the help message: `python project1.py -h`
 | :----:  | :----:  |  :----:  | :----:  |
 | 400  |0.8672| 0.9989  | 0.9414 |
 
-Note: the model used label smoothing so the losses value is higher than the normal ones.
+Note: the model used label smoothing so loss values are higher than the normal ones.

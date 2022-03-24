@@ -19,5 +19,6 @@ To see the help message: `python project1.py -h`
 
 |  epoch   | train loss  |  test loss   | test accuracy |
 | :----:  | :----:  |  :----:  | :----:  |
-| 400  |xxx| xx  | xxx |
+| 400  |0.8672| 0.9989  | 0.9414 |
 
+Note: the model used label smoothing so the losses value is higher than the normal ones.

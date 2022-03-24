@@ -119,11 +119,11 @@ def compare_curve(result_list, label, dot=True):
 
 
 def compare_structure():
-	_, loss20, acc20, _ = parse_txt('slurm-16525477.out')
-	_, loss32, acc32, _ = parse_txt('slurm-16525534.out')
-	_, loss44, acc44, _ = parse_txt('slurm-16525535.out')
-	_, loss56, acc56, _ = parse_txt('slurm-16525546.out')
-	_, loss110, acc110, _ = parse_txt('slurm-16525553.out')
+	_, loss20, acc20, _ = parse_txt('results/slurm-16525477.out')
+	_, loss32, acc32, _ = parse_txt('results/slurm-16525534.out')
+	_, loss44, acc44, _ = parse_txt('results/slurm-16525535.out')
+	_, loss56, acc56, _ = parse_txt('results/slurm-16525546.out')
+	_, loss110, acc110, _ = parse_txt('results/slurm-16525553.out')
 	label = [
 		'resnet20 + 64filter',
 		'resnet32 + 32fillter',
@@ -149,11 +149,11 @@ def compare_structure():
 
 
 def compare_aug():
-	_, no_opt, acc1, _ = parse_txt('no_opt.txt')
-	_, crop, acc2, _ = parse_txt('crop.txt')
-	_, cutout, acc3, _ = parse_txt('cutout.txt')
-	_, flip, acc4, _ = parse_txt('flip.txt')
-	_, best, acc5, _ = parse_txt('all.txt')
+	_, no_opt, acc1, _ = parse_txt('results/no_opt.txt')
+	_, crop, acc2, _ = parse_txt('results/crop.txt')
+	_, cutout, acc3, _ = parse_txt('results/cutout.txt')
+	_, flip, acc4, _ = parse_txt('results/flip.txt')
+	_, best, acc5, _ = parse_txt('results/all.txt')
 
 	label = [
 		'no augmentation',
@@ -180,29 +180,32 @@ def compare_aug():
 
 
 def compare_reg():
-	_, _, no_reg, _ = parse_txt('no_reg.txt')
-	_, _, label_s, _ = parse_txt('label.txt')
-	_, _, weight, _ = parse_txt('weight.txt')
-	_, _, best, _ = parse_txt('all.txt')
+	_, _, no_reg, _ = parse_txt('results/no_reg.txt')
+	_, _, label_s, _ = parse_txt('results/label.txt')
+	_, _, weight, _ = parse_txt('results/weight.txt')
+	_, _, weight_batchsize, _ = parse_txt('results/weight_batchsize.txt')
+	_, _, best, _ = parse_txt('results/all.txt')
 
 	label = [
 		'no regularization',
 		'label smoothing($\epsilon=0.2$)',
 		'weight_decay = 0.2',
+		'weight_decay = 1e-5*batch size',
 		'label smoothing($\epsilon=0.2$), weight_decay = 0.2'
 	]
 	plt.style.use('ggplot')
-	p = compare_curve([no_reg, label_s, weight, best], label)
+	p = compare_curve([no_reg, label_s, weight, weight_batchsize, best], label)
 	p.xlabel('epoch')
 	p.ylabel('test accuracy')
 	p.savefig('compare_reg.png')
+	p.savefig('report/compare_reg.png')
 	p.show()
 
 
 def compare_optimzier():
-	_, sgd_loss, sgd_acc, _ = parse_txt('sgd.txt')
-	_, adam_loss, adam_acc, _ = parse_txt('adam.txt')
-	_, adamw_loss, adamw_acc, _ = parse_txt('all.txt')
+	_, sgd_loss, sgd_acc, _ = parse_txt('results/sgd.txt')
+	_, adam_loss, adam_acc, _ = parse_txt('results/adam.txt')
+	_, adamw_loss, adamw_acc, _ = parse_txt('results/all.txt')
 
 	label = [
 		'SGD',
@@ -216,12 +219,10 @@ def compare_optimzier():
 	p.xlabel('epoch')
 	p.ylabel('test loss')
 
-
 	plt.subplot(1, 2, 2)
 	p = compare_curve([sgd_acc, adam_acc, adamw_acc], label)
 	p.xlabel('epoch')
 	p.ylabel('test accuracy')
-
 
 	plt.savefig('compare_optimizer.png')
 	plt.savefig('report/compare_optimizer.png')
@@ -230,26 +231,29 @@ def compare_optimzier():
 
 def compare_scheduler():
 	dot = False
-	_, loss1, acc_1, _ = parse_txt('slurm-16597410.out')
-	_, loss2, acc_2, _ = parse_txt('slurm-16597294.out')
-	_, loss3, acc_3, _ = parse_txt('slurm-16597715.out')
-	_, loss4, acc_4, _ = parse_txt('slurm-16597719.out')
+	_, loss1, acc_1, _ = parse_txt('results/slurm-16597410.out')
+	_, loss2, acc_2, _ = parse_txt('results/slurm-16597294.out')
+	_, loss3, acc_3, _ = parse_txt('results/slurm-16597715.out')
+	_, loss4, acc_4, _ = parse_txt('results/slurm-16597719.out')
+	_, loss5, acc_5, _ = parse_txt('results/slurm-16624156.out')
+
 	label = [
 		'patience=10, factor=0.1, threshold=1e-2',
 		'patience=10, factor=0.1, threshold=1e-4',
 		'patience=50, factor=0.5, threshold=1e-2',
 		'patience=50, factor=0.5, threshold=1e-4',
+		'no learning rate scheduler'
 	]
 	plt.style.use('ggplot')
 	plt.figure(figsize=(18, 6), dpi=80)
 	plt.subplot(1, 2, 1)
-	p = compare_curve([loss1, loss2, loss3, loss4], label, dot)
+	p = compare_curve([loss1, loss2, loss3, loss4, loss5], label, dot)
 	p.xlabel('epoch')
 	p.ylabel('test loss')
 	p.ylim([0.99, 1.3])
 
 	plt.subplot(1, 2, 2)
-	p = compare_curve([acc_1, acc_2, acc_3, acc_4], label, dot)
+	p = compare_curve([acc_1, acc_2, acc_3, acc_4, acc_5], label, dot)
 	p.xlabel('epoch')
 	p.ylabel('test accuracy')
 	p.ylim([0.8, 0.95])

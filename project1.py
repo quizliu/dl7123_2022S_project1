@@ -71,15 +71,15 @@ def arg_parser():
 
 	# bug: -p false sets the parameter True, only -p '' sets the parameter false
 	if type(args.progress_bar) == str:
-		args.progress_bar = True if args.progress_bar.lower == 'true' else False
+		args.progress_bar = True if args.progress_bar.lower() == 'true' else False
 	if type(args.cuda) == str:
-		args.cuda = True if args.cuda.lower == 'true' else False
+		args.cuda = True if args.cuda.lower() == 'true' else False
 	if type(args.test) == str:
-		args.test = True if args.test.lower == 'true' else False
+		args.test = True if args.test.lower() == 'true' else False
 	if type(args.plot) == str:
-		args.plot = True if args.plot.lower == 'true' else False
+		args.plot = True if args.plot.lower() == 'true' else False
 	if type(args.save) == str:
-		args.save = True if args.save.lower == 'true' else False
+		args.save = True if args.save.lower() == 'true' else False
 
 	args.cuda = args.cuda and torch.cuda.is_available()
 	return args

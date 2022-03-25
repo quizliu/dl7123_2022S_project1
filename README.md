@@ -12,9 +12,9 @@ plot_essay.py and results are used for plot figures in our report.
 ## usage
 Dependency libs: `torch, torchvision, numpy, matplotlib.pyplot, tqdm`
 
-To build and train our final model: `python project1.py -e 400`
+To build and train our final model: `python project1_model.py -e 400`
 
-To see the help message: `python project1.py -h`
+To see the help message: `python project1_model.py -h`
 
 ## result
 

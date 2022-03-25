@@ -18,7 +18,7 @@ To see the help message describes code's parameters: `python project1_model.py -
 
 To load the trained model and predict:
 
-```
+```python
 from project1_model import project1_model
 model = project1_model()
 checkpoint = torch.load('project1_model.pt', map_location=torch.device("cpu"))

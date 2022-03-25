@@ -2,9 +2,9 @@
 ## description
 This is project1's repo for dl7123.
 
-project1.py is a command line tool for building and training a model. No other codes needed.
+project1_model.py is a command line tool for building and training a model. No other codes needed.
 
-project1.pt is the trained model.
+project1_model.pt is the trained model.
 
 plot_essay.py and results are used for plot figures in our report.
 

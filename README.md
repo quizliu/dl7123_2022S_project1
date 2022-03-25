@@ -14,12 +14,23 @@ Dependency libs: `torch, torchvision, numpy, matplotlib.pyplot, tqdm`
 
 To build and train our final model: `python project1_model.py -e 400`
 
-To see the help message: `python project1_model.py -h`
+To see the help message describes code's parameters: `python project1_model.py -h`
+
+To load the trained model and predict:
+
+```
+from project1_model import project1_model
+model = project1_model()
+checkpoint = torch.load('project1_model.pt', map_location=torch.device("cpu"))
+model.load_state_dict(checkpoint)
+model.eval()
+```
+
 
 ## result
 
 |  epoch   | train loss  |  test loss   | test accuracy |
 | :----:  | :----:  |  :----:  | :----:  |
-| 400  |0.8672| 0.9989  | 0.9414 |
+| 400  |0.8672| 0.9989  | 0.9414 | 
 
 Note: the model used label smoothing so loss values are higher than the normal ones.

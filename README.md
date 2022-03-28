@@ -10,7 +10,7 @@ plot_essay.py and results are used for plot figures in our report.
 
 
 ## usage
-Dependency libs: `torch, torchvision, numpy, matplotlib.pyplot, tqdm`
+Dependency libs: `torch>=1.10 , torchvision, numpy, matplotlib.pyplot, tqdm`
 
 To build and train our final model: `python project1_model.py -e 400`
 
